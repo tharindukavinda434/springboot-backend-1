@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: tharindu_db
+      MYSQL_USER: tharindu_user
+      MYSQL_PASSWORD: tharindu_password
+    networks:
+      my-network:
+        ipv4_address: 172.18.0.2
+    ports:
+      - "3306:3306"
+
+  backend:
+    build: .
+    container_name: backend-container
+    depends_on:
+      - mysql
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://172.18.0.2:3306/tharindu_db
+      SPRING_DATASOURCE_USERNAME: tharindu_user
+      SPRING_DATASOURCE_PASSWORD: tharindu_password
+    ports:
+      - "8080:8080"
+    networks:
+      my-network:
+        ipv4_address: 172.18.0.3
+
+networks:
+  shared_network:
+    name: my-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+
